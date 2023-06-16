@@ -8,57 +8,55 @@ This file runs all other python files and sends the control values to the charge
 """
 import ChargingSimulator.InsiteReportsHandler
 import ChargingSimulator.OptimizationModel as opt
-import datetime
+from ChargingSimulator.parameters import param
 import pandas as pd
 from datetime import datetime as dt
 import datetime
 import numpy as np
-from ChargingSimulator.parameters import param
+
 
 ## Defining the function controller(i), for which i is the iteration number
 def controller(i):
+    # updating tnow
     tnow_initial = param['tnow_initial']
     Ts_data = param['Ts_data']
     tnow = dt.strptime(tnow_initial, '%Y-%m-%d %H:%M:%S') + i * datetime.timedelta(minutes=Ts_data)
 
+    # load in the considered horizon
     df_load = ChargingSimulator.InsiteReportsHandler.InsiteReportsHandler().obtain_loads(tnow, Ts_data)[0]
 
-    try: df_result
-    except NameError: df_result = None
-        ## Formatting the EV dataframe for the first iteration
+    # evs to be scheduled in the horizon
+    ev_input = pd.read_csv(param['ev_file'], dayfirst=True, parse_dates=[2, 3], dtype={0: np.int64})
+    mask = (ev_input['T_departure'] >= tnow) & (ev_input['T_arrival'] <= tnow)
+    ev_input = ev_input.loc[mask]
     if i == 0:
-        df = pd.read_csv(r''+param['ev_file'],index_col=(0), header=(0), parse_dates=[2,3], dtype={0: np.int64})
-        df['E_arrival'] = 0
-        mask = (df['T_departure'] >= tnow)
-        df = df.loc[mask]
-        df_ev = df.copy()
-        df_ev['E_requested'] = df_ev['E_requested'] * param['eff']
-        mask = df_ev['E_requested'] > ((df_ev['T_departure']- df_ev['T_arrival']).dt.seconds/3600) * (param['vmax'] * param['imax'])/1000 * param['eff'] * param['E_factor']
-        df_ev.loc[mask,'E_requested'] = ((df_ev['T_departure']- df_ev['T_arrival']).dt.seconds/3600) * (param['vmax'] * param['imax'])/1000 * param['eff'] * param['E_factor']
-  
-    ## Loading the previous data frame for iterations i > 0
+        columns = ['ChargerId', 'E_requested', 'T_arrival', 'T_departure']
+        ev_status = pd.DataFrame(columns=columns)
     else:
-        df_ev = pd.read_csv(r'ChargingSimulator/data/ev.csv',index_col=(0), header=(0), parse_dates=[2,3], dtype={0: np.int64})
-        df_ev['T_arrival'] = df_ev['T_arrival'].mask(df_ev['T_arrival'] < str(tnow), str(tnow))
-        df_ev = df_ev.sort_values(by=['ChargerId'],ascending=[True]).copy()
-     
-        
-    ## Running the optimization model 
-    Icharge, df_result, df_ev = opt.runOptimization(df_load, df_ev, tnow, Ts_data)
+        ev_status = pd.read_csv('ChargingSimulator/data/ev.csv', header=(0), parse_dates=[2, 3], dtype={0: np.int64})
 
-    print("Running...")
-    print("Iteration: " + str(i+1))
-    print(tnow)
-    
-    ## Printing the calculated values
-    #for i in range(len(Icharge)):
-    #    print("EV: " + str(i+1))
-    #    print("Current: " + str(df_result['Current' + str(i+1)].loc[str(tnow)]))
-    #    print("Energy: " + str(df_result['EV' + str(i+1)].loc[str(tnow)]))
-    #    print("Power : " + str(df_result['PEV' + str(i+1)].loc[str(tnow)]))
-    
-    ## If charger is controlled through python, current values can be send by adding code below:
-    
+    new_ev = ev_input[~ev_input['ChargerId'].isin(ev_status['ChargerId'])]
+    if new_ev.empty:
+        print("No new ev at time = " + str(tnow))
+        df_ev = ev_status
+    else:
+        print("New ev comes at time = " + str(tnow))  # check feasibility and then add to the ev.csv, which is the list with involved evs
+        mask = new_ev['E_requested'] > ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * (
+                    param['Vcharger'] * param['Imax'] * param['eff']) / 1000 * param['eff'] * param['E_factor']
+        new_ev.loc[mask, 'E_requested'] = ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * (
+                    param['Vcharger'] * param['Imax'] * param['eff']) / 1000 * param['eff'] * param['E_factor']
+        df_ev = pd.concat([ev_status, new_ev], ignore_index=False)
 
-    ## Returning the values to the SimulinkConnection file
-    return Icharge, df_result.loc[[str(tnow)]]
+
+    df_ev.reset_index(drop=True, inplace=True)
+    df_ev['T_arrival'] = df_ev['T_arrival'].mask(df_ev['T_arrival'] < tnow, tnow)
+    # Running the optimization model and return the optimized current to be sent
+    if len(df_ev) > 0:
+          Icharge, df_result = opt.runOptimization(df_load, df_ev, tnow, Ts_data)
+
+    else:
+        print("No ev to schedule at time = " + str(tnow))
+        Icharge = 0
+        df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
+
+    return Icharge   #df_result.loc[[str(tnow)]]

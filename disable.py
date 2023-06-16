@@ -1,4 +1,4 @@
-from CANopen_laadpaal.node_old import laadpaal
+from CANopen_laadpaal.node import laadpaal
 import os, sys
 from pathlib import Path
 eds = os.path.join(Path(sys.path[0]), "CANopen_laadpaal/V2G500V30A.eds")

@@ -25,18 +25,18 @@ class InsiteReportsHandler:
         self.creds = json.load(open("ChargingSimulator/creds.txt"))
         self.serverpath = 'https://portal.insitereports.nl/data.php?'
         try:
-            print('Loading local InsiteReports token file')
+            #print('Loading local InsiteReports token file')
             self.token = open("ChargingSimulator/_InsideReportsToken", "r").read()
         except FileNotFoundError:
-            print('No local token found')
+            #print('No local token found')
             self.obtain_token()
-        print('Insitereports handler initialized')
+        #print('Insitereports handler initialized')
 
     def obtain_token(self):
-        print('Obtaining new InsiteReports token')
+        #print('Obtaining new InsiteReports token')
         result = requests.post(self.serverpath + 'action=login', data=self.creds).json()  # obtain new token
         if result['success']:
-            print('Succesfull obtained new token')
+            #print('Succesfull obtained new token')
             self.token = result['token']
             file = open("ChargingSimulator/_InsideReportsToken", "w")
             file.write(self.token)
@@ -45,30 +45,30 @@ class InsiteReportsHandler:
         return
 
     def obtain_data(self, report_id, from_date, to_date):
-        print('Requesting InsiteReports data')
+        #print('Requesting InsiteReports data')
         report = requests.get(self.serverpath + 'action=getdata&token=' + str(self.token) + '&report=' +
                               str(report_id) + '&from=' + str(from_date) + '&to=' + str(to_date) + '&output=csv')
         if report.text[13:18] == 'false':
-            print('Current token invaled, requesting new token')
+            #print('Current token invaled, requesting new token')
             self.obtain_token()
             report = requests.get(self.serverpath + 'action=getdata&token=' + str(self.token) + '&report=' +
                                   str(report_id) + '&from=' + str(from_date) + '&to=' + str(to_date) + '&output=csv')
         textfile = report.text
         textfile = io.StringIO(textfile)
         df = pd.read_csv(textfile, sep=';', parse_dates=True, index_col='Tijdpunten [jaar-maand-dag uur:min:sec]')
-        print('Succesfull InsiteReports server connection')
+        #print('Succesfull InsiteReports server connection')
         return df if not df.empty else False
 
     ## Creating the function responsible for loading the building loads
     def obtain_loads(self, tnow, Ts_data):
         success = True
         try:
-            print('Requesting Loads data')
+            #print('Requesting Loads data')
             # timing context:
             today = tnow.date()
             tomorrow = today + datetime.timedelta(days=1)
             # load data:
-            print('Loads start loading data')
+            #print('Loads start loading data')
             raw_loads = self.obtain_data(report_id="35940", from_date=today.strftime("%Y-%m-%d"),
                                       to_date=tomorrow.strftime("%Y-%m-%d"))
 
