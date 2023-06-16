@@ -12,10 +12,11 @@ import time
 # variable initialization
 sim_out = pd.DataFrame()
 testbed = param['Testbed']
-
+connect_with_charger = True
 
 
 def send_to_chager(lp, i, set_current):
+    global connect_with_charger
     set_voltage = param["v_charger"]
 
     # Enable for the 1st iteration and disable at the last iteration
@@ -26,6 +27,7 @@ def send_to_chager(lp, i, set_current):
         print('last iteration')
         lp.setSetpoint(0, 0)
         lp.disablePower()
+        connect_with_charger = False
 
     if set_current is not None:
         print('current sent = ', set_current)
@@ -33,7 +35,7 @@ def send_to_chager(lp, i, set_current):
 
 def send_current_periodically():
     # send signal every 0.5 secs
-    while True:
+    while connect_with_charger:
         print(lp.Power_Module_Status)
         time.sleep(0.5)
 
@@ -61,9 +63,7 @@ for i in range(0, param['N']):
 # wait for the thread to finish and stop it
 #if testbed == True:
     #send_current_thread.join()
-send_current_thread.join()
 print('Simulation completed.')
-
 
 """
 from tkinter import *
