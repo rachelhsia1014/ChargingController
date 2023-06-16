@@ -27,3 +27,10 @@ param = {
     # (default = 1) Requested energy is multiplied by this value, use this if optimization problem becomes infeasable.
 
 }
+
+'''
+grid power available around 11 kW
+charger power available around 10 kW
+if three batteries: each car can have around 3 kW power max
+(which according to max current at around 8 amps)
+'''
