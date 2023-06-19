@@ -9,7 +9,7 @@ import numpy as np
 
 # run optimization iterations
 for i in range(0, param['N']+1):
-    controller(i)
+    current = controller(i)
 
 
 

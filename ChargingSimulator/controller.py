@@ -13,6 +13,7 @@ import pandas as pd
 from datetime import datetime as dt
 import datetime
 import numpy as np
+from ChargingSimulator.PriceCurveLoader import load_price
 
 
 ## Defining the function controller(i), for which i is the iteration number
@@ -26,7 +27,7 @@ def controller(i):
     df_load = ChargingSimulator.InsiteReportsHandler.InsiteReportsHandler().obtain_loads(tnow, Ts_data)[0]
 
     # price curve in the considered horizon
-
+    #df_price = load_price()
 
     # evs to be scheduled in the horizon
     ev_input = pd.read_csv(param['ev_file'], dayfirst=True, parse_dates=[2, 3], dtype={0: np.int64})
@@ -78,10 +79,11 @@ def controller(i):
     df_ev.reset_index(drop=True, inplace=True)
     # Running the optimization model and return the optimized current to be sent
     if len(df_ev) > 0:
-          opt.runOptimization(df_load, df_ev, tnow, Ts_data)
+          Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data)
 
     else:
         print("No ev to schedule at time = " + str(tnow))
         Icharge = 0
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
+    return Icharge

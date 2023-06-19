@@ -171,9 +171,15 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
                 df_ev.iloc[i, 1] = 0
 
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
-        print('ev status updated.')
+        #print('ev status updated.')
 
 
     except Exception as SolverError:
         print("!! Error with solver error:" + str(SolverError))
-    
+
+    if 'EV2' in df_result.columns:
+        Inow = round(df_result['Current2'].loc[str(tnow)], 2)
+    else:
+        Inow = 0
+
+    return Inow

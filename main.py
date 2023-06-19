@@ -52,11 +52,10 @@ if testbed == True:
 
 # run optimization iterations
 for i in range(0, param['N']):
-    Icharge_result = controller(i)
-    Icharge_set = Icharge_result
-    send_to_chager(lp, i, Icharge_set)
-
-
+    Icharge_set = controller(i)
+    print('current to be sent = ' + str(Icharge_set))
+    if testbed == True:
+        send_to_chager(lp, i, Icharge_set)
 
 print('Simulation completed.')
 
