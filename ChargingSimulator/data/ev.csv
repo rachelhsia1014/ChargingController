@@ -1,2 +1,1 @@
-ChargerId,E_requested,T_arrival,T_departure,I_arrival,I_departure
-2,0.7494999051898892,2022-03-21 07:30:00,2022-03-21 08:15:00,1647847800000000000,1647850500000000000
+ChargerId,E_requested,T_arrival,T_departure

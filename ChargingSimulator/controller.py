@@ -53,13 +53,13 @@ def controller(i):
 
     new_ev = ev_input[~ev_input['ChargerId'].isin(ev_status['ChargerId'])]
     if new_ev.empty:
-        print("No new ev at time = " + str(tnow))
+        #print("No new ev at time = " + str(tnow))
         df_ev = ev_status
-    else:
-        print("New ev comes at time = " + str(tnow))  # check feasibility and then add to the ev.csv, which is the list with involved evs
+    else:# check feasibility and then add to the ev.csv, which is the list with involved evs
         new_ev = new_ev.reset_index()
         new_ev.drop('index', axis=1, inplace=True)
-        new_ev['E_requested'] = new_ev['E_requested'] * 1.1 # request more to ensure enough delivery
+        # new_ev['E_requested'] = new_ev['E_requested'] * 1.1 # request more to ensure enough delivery
+        new_ev['E_requested'] = new_ev['E_requested'].astype(float)
         mask = new_ev['E_requested'] > ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * (
                     param['Vcharger'] * param['Imax'] * param['eff']) / 1000 * param['eff'] * param['E_factor']
         new_ev.loc[mask, 'E_requested'] = ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * (
@@ -68,6 +68,7 @@ def controller(i):
         default_Icharge = [0] * (param['N'] + 1)
         sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
         for i in range(0, len(new_ev)):
+            print("EV" + str(new_ev['ChargerId'][i]) + " comes at time = " + str(tnow))
             sim_out['EV' + str(new_ev['ChargerId'][i])] = default_Icharge
         sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
 

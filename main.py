@@ -37,7 +37,7 @@ def send_to_chager(lp, i, set_current):
 def send_current_periodically():   # send signal every 0.5 secs
 
     while connect_with_charger:
-        print(lp.Power_Module_Status)
+        lp.Power_Module_Status
         time.sleep(0.5)
 
 
@@ -53,9 +53,9 @@ if testbed == True:
 # run optimization iterations
 for i in range(0, param['N']):
     Icharge_set = controller(i)
-    print('current to be sent = ' + str(Icharge_set))
     if testbed == True:
         send_to_chager(lp, i, Icharge_set)
+        time.sleep(5)
 
 print('Simulation completed.')
 
