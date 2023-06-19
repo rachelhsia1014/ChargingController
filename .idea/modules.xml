@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/V2XTestbed.iml" filepath="$PROJECT_DIR$/.idea/V2XTestbed.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/V2XTestbed_local.iml" filepath="$PROJECT_DIR$/.idea/V2XTestbed_local.iml" />
     </modules>
   </component>
 </project>

@@ -6,9 +6,10 @@ from datetime import datetime as dt
 import datetime
 import numpy as np
 
+
 # run optimization iterations
-for i in range(0, 6):
-    Icharge_result = controller(i)
+for i in range(0, param['N']+1):
+    controller(i)
 
 
 

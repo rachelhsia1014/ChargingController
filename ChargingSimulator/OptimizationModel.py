@@ -7,10 +7,10 @@ from ChargingSimulator.parameters import param
 
 def runOptimization(df_load, df_ev, tnow, Ts_data):
     #converting the datetime object to an integer which can be processed by Pyomo
+    #df_ev = df_ev.loc[df_ev['E_requested'] >= 0.01]
+    df_ev['T_arrival'] = tnow
     df_ev['I_arrival'] = df_ev['T_arrival'].apply(lambda x: x.value).copy()
     df_ev['I_departure'] = df_ev['T_departure'].apply(lambda x: x.value).copy()
-   
-
 
     #Checking to see whether or not the arrival time is within the loads dataframe
     df_ev = df_ev[df_ev.index.isin(df_ev['I_arrival'].loc[df_ev['I_arrival'].isin(df_load.index)].index)].copy()
@@ -120,62 +120,60 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
     mymodel = create_model(df_load, df_ev, dummies, Ts_data)
     solver = SolverFactory('ipopt') # This is ipopt, locally installed nonlinear solver
     solver.options['max_iter'] = 100000 # Number of iterations
-    #try:
-    results = solver.solve(mymodel, tee=False)  # tee means to show the steps of the solver
+    try:
+        results = solver.solve(mymodel, tee=False)  # tee means to show the steps of the solver
 
-    pv = [mymodel.Ppv[k]() for k in mymodel.N]
-    load = [mymodel.Pload[k]() for k in mymodel.N]
-    grid = [mymodel.Pgrid[k]() for k in mymodel.N]
-    time = [mymodel.T[k]() for k in mymodel.N]
+        pv = [mymodel.Ppv[k]() for k in mymodel.N]
+        load = [mymodel.Pload[k]() for k in mymodel.N]
+        grid = [mymodel.Pgrid[k]() for k in mymodel.N]
+        time = [mymodel.T[k]() for k in mymodel.N]
 
-    E_EV = []
-    P_EV = []
-    Icharge = []
+        E_EV = []
+        P_EV = []
+        Icharge = []
 
-    for i in mymodel.V:
-        E_EV.append([mymodel.Eev[k, i]() for k in mymodel.N])
-        P_EV.append([mymodel.Pev[k, i]() for k in mymodel.N])
-        Icharge.append([mymodel.Icharge[k, i]() for k in mymodel.N])
+        for i in mymodel.V:
+            E_EV.append([mymodel.Eev[k, i]() for k in mymodel.N])
+            P_EV.append([mymodel.Pev[k, i]() for k in mymodel.N])
+            Icharge.append([mymodel.Icharge[k, i]() for k in mymodel.N])
+        Icharge = [[round(num, 2) for num in sublist] for sublist in Icharge]
 
-    P_EVT = [mymodel.Pevtot[k]() for k in mymodel.N]
+        P_EVT = [mymodel.Pevtot[k]() for k in mymodel.N]
 
-    result_df = pd.DataFrame()
+        result_df = pd.DataFrame()
+        for i in mymodel.V:
+            result_df['EV' + str(df_ev['ChargerId'][i])] = pd.DataFrame(data=E_EV[i])
+            result_df['PEV' + str(df_ev['ChargerId'][i])] = pd.DataFrame(data=P_EV[i])
+            result_df['Current' + str(df_ev['ChargerId'][i])] = pd.DataFrame(data=Icharge[i])
 
-    for i in mymodel.V:
-        result_df['EV' + str(i+1)] = pd.DataFrame(data=E_EV[i])
-        result_df['PEV' + str(i+1)] = pd.DataFrame(data=P_EV[i])
-        result_df['Current' + str(i+1)] = pd.DataFrame(data=Icharge[i])  #df_ev.loc[i,'ChargerId']
+        result_df['PEVTot'] = pd.DataFrame(data=P_EVT)
+        result_df['PV'] = pd.DataFrame(data=pv)
+        result_df['Load'] = pd.DataFrame(data=load)
+        result_df['Grid'] = pd.DataFrame(data=grid)
+        result_df['Time'] = pd.DataFrame(data=time)
+        result_df.index = df_load.index # with datetime index presented by int
 
-    result_df['PEVTot'] = pd.DataFrame(data=P_EVT)
-    result_df['PV'] = pd.DataFrame(data=pv)
-    result_df['Load'] = pd.DataFrame(data=load)
-    result_df['Grid'] = pd.DataFrame(data=grid)
-    result_df['Time'] = pd.DataFrame(data=time)
-    result_df.index = df_load.index
-    pd.set_option('display.max_rows', 50)
+        df_result = result_df.copy()
+        df_result.index = pd.to_datetime(df_load.index) # with datetime index
 
-    df_result = result_df.copy()
-    df_result.index = pd.to_datetime(df_load.index)
+        print("Optimization at time = " + str(tnow))
+        ## Printing the calculated values
+        for i in range(len(Icharge)):
+            print("EV" + str(df_ev['ChargerId'][i]) + " (requesting " + str(df_ev.iloc[i, 1]) + " kWh) is charged at " + str(round(df_result['Current' + str(df_ev['ChargerId'][i])].loc[str(tnow)], 2)) + "A at " + str(tnow))
+            sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
+            sim_out.index = pd.to_datetime(sim_out.index)
+            sim_out["EV" + str(df_ev['ChargerId'][i])] = sim_out["EV" + str(df_ev['ChargerId'][i])].combine(df_result['Current' + str(df_ev['ChargerId'][i])], lambda x1, x2: x1 if pd.isna(x2) else x2)
+            sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
 
-    print("Optimization at time = " + str(tnow))
-    for i in mymodel.V:
-        #Icharge[i] = [round(x, 2) for x in Icharge[i]]
-        #print('EV ' + str(df_ev.iloc[i, 0]) + ' is charged at ' + str(Icharge[i][0]) + ' , receiving ' + str(df_result['EV' + str(df_ev.iloc[i+1, 0])].loc[str(tnow)]) + 'kWh.')
-        #print('Requested energy is updated from ' + str(df_ev.iloc[i, 1]) + ' to ' + str(df_ev.iloc[i, 1] - df_result['EV' + str(i + 1)][str(tnow + datetime.timedelta(minutes=Ts_data))].clip(0)) )
-        df_ev.iloc[i, 1] = df_ev.iloc[i, 1] - df_result['EV' + str(i + 1)][str(tnow + datetime.timedelta(minutes=Ts_data))]
+        for i in mymodel.V:
+            df_ev.iloc[i, 1] = df_ev.iloc[i, 1] - df_result['EV' + str(df_ev['ChargerId'][i])][str(tnow + datetime.timedelta(minutes=Ts_data))]
+            if df_ev.iloc[i, 1] < 0 or round(df_ev.iloc[i, 1], 2) == 0.00:
+                df_ev.iloc[i, 1] = 0
 
-    df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
-    print('ev status updated.')
+        df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
+        print('ev status updated.')
 
 
-    ## Printing the calculated values
-    '''for i in range(len(Icharge)):
-        print("EV: " + str(df_ev.iloc[i, 0]))
-        print("Current: " + str(df_result['Current' + str(i)].loc[str(tnow)]))
-        print("Energy: " + str(df_result['EV' + str(i)].loc[str(tnow)]))
-        print("Power : " + str(df_result['PEV' + str(i)].loc[str(tnow)]))'''
-
-    #except Exception as SolverError:
-        #print("Error with solver error:" + str(SolverError))
+    except Exception as SolverError:
+        print("!! Error with solver error:" + str(SolverError))
     
-    return Icharge[0][0], df_result
