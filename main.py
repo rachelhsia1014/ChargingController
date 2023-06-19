@@ -5,6 +5,7 @@ import os, sys
 from pathlib import Path
 import threading
 import time
+import random
 
 
 
@@ -13,6 +14,7 @@ import time
 sim_out = pd.DataFrame()
 testbed = param['Testbed']
 connect_with_charger = True
+random_list = []
 
 
 def send_to_chager(lp, i, set_current):
@@ -31,14 +33,20 @@ def send_to_chager(lp, i, set_current):
         connect_with_charger = False
 
     if set_current is not None:
-        print('current sent = ', set_current)
+        print(str(i) + 'iteration current sent = ', set_current)
         lp.setSetpoint(set_voltage, set_current)
 
 def send_current_periodically():   # send signal every 0.5 secs
 
     while connect_with_charger:
-        lp.Power_Module_Status
-        time.sleep(0.5)
+        try:
+            status = lp.Power_Module_Status
+            time.sleep(0.1653)
+        except:
+            print('!! Can not ask for status.')
+            time.sleep(0.216)
+            lp.Power_Module_Enable = 'Enable'
+            print('Re-enable the charger.')
 
 
 # initialize communication with charger and start periodically sending the set current
@@ -52,10 +60,16 @@ if testbed == True:
 
 # run optimization iterations
 for i in range(0, param['N']):
+
+    #Icharge_set = random.uniform(0.0, 3.0)
+    #random_list.append(Icharge_set)
+
     Icharge_set = controller(i)
     if testbed == True:
         send_to_chager(lp, i, Icharge_set)
-        time.sleep(5)
+        time.sleep(1)
 
+df_random = pd.DataFrame(data=random_list)
+df_random.to_csv('ChargingSimulator/data/random_list')
 print('Simulation completed.')
 

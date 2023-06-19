@@ -84,7 +84,7 @@ def controller(i):
 
     else:
         print("No ev to schedule at time = " + str(tnow))
-        Icharge = 0
+        Icharge = param['Imin']
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
     return Icharge
