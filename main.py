@@ -6,7 +6,7 @@ from pathlib import Path
 import threading
 import time
 import random
-
+from time import strftime, localtime
 
 
 # starting main
@@ -14,13 +14,16 @@ import random
 sim_out = pd.DataFrame()
 testbed = param['Testbed']
 connect_with_charger = True
-random_list = []
+df_Icharge = pd.DataFrame(columns=['Datetime', 'Icharge'])
+set_current = 0
+set_voltage = param["Vcharger"]
+charger_connect = False
 
-
-def send_to_chager(lp, i, set_current):
-    global connect_with_charger
+def send_to_chager(lp, i):
+    global connect_with_charger, df_Icharge, set_current, set_voltage
     set_voltage = param["Vcharger"]
 
+    #print('globle set_current updated to: ', set_current)
     # Enable for the 1st iteration and disable at the last iteration
     if i == 0:
         lp.Power_Module_Enable = 'Enable'
@@ -29,24 +32,29 @@ def send_to_chager(lp, i, set_current):
     if i == param['N'] - 1:
         print('last iteration')
         lp.setSetpoint(0, 0)
-        lp.disablePower()
         connect_with_charger = False
 
     if set_current is not None:
         print(str(i) + 'iteration current sent = ', set_current)
+        time_now = strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))
+        new_df_row = pd.DataFrame([[time_now, set_current]], columns=['Datetime', 'Icharge'])
+        df_Icharge = pd.concat([df_Icharge, new_df_row])
         lp.setSetpoint(set_voltage, set_current)
 
-def send_current_periodically():   # send signal every 0.5 secs
 
+def send_current_periodically():   # send signal every 0.5 secs
+    global set_current, set_voltage
     while connect_with_charger:
         try:
-            status = lp.Power_Module_Status
-            time.sleep(0.1653)
+            #status = lp.Power_Module_Status
+            lp.setSetpoint(set_voltage, set_current)
+            time.sleep(0.1)
         except:
-            print('!! Can not ask for status.')
-            time.sleep(0.216)
-            lp.Power_Module_Enable = 'Enable'
-            print('Re-enable the charger.')
+            print('Module uptime:' + str(lp.Module_uptime()))
+            print('Switch off reason:' + str(lp.Turn_off_reason))
+            print('Warning status:' + str(lp.Warning_status()))
+            print('Error source:' + str(lp.Error_source()))
+            #print('Reconnect reset reason:' + str(lp.Reconnect_reason()))
 
 
 # initialize communication with charger and start periodically sending the set current
@@ -55,6 +63,7 @@ if testbed == True:
     eds = os.path.join(Path(sys.path[0]), "CANopen_laadpaal/V2G500V30A.eds")
     lp = laadpaal(node_id=48, object_dictionary=eds)
 
+    lp.Power_Module_Enable = 'Disable'
     send_current_thread = threading.Thread(target=send_current_periodically)
     send_current_thread.start()
 
@@ -63,13 +72,24 @@ for i in range(0, param['N']):
 
     #Icharge_set = random.uniform(0.0, 3.0)
     #random_list.append(Icharge_set)
+    #start = time.time()
 
-    Icharge_set = controller(i)
+    set_current, charger_connect = controller(i, charger_connect)
+    if charger_connect == False:
+        set_current = 0
+
     if testbed == True:
-        send_to_chager(lp, i, Icharge_set)
-        time.sleep(1)
+        send_to_chager(lp, i)
+        time.sleep(2)
+        #end = time.time()
+        #print('optimazation time: ', end-start)
+        #random_list.append(end-start)
 
-df_random = pd.DataFrame(data=random_list)
-df_random.to_csv('ChargingSimulator/data/random_list')
+
+
+#df_random = pd.DataFrame(data=random_list)
+#df_random.to_csv('ChargingSimulator/data/random_list')
+lp.disablePower()
+df_Icharge.to_csv('ChargingSimulator/data/RealTime_Icharge')
 print('Simulation completed.')
 

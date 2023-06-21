@@ -177,8 +177,8 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
     except Exception as SolverError:
         print("!! Error with solver error:" + str(SolverError))
 
-    if param['Controlled_ev'] in df_result.columns:
-        Inow = round(df_result['Current2'].loc[str(tnow)], 2)
+    if ('EV' + param['Controlled_ev']) in df_result.columns:
+        Inow = round(df_result['Current' + param['Controlled_ev']].loc[str(tnow)], 2)
     else:
         Inow = param['Imin']
 

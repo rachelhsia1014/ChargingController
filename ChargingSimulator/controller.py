@@ -13,11 +13,12 @@ import pandas as pd
 from datetime import datetime as dt
 import datetime
 import numpy as np
+
 from ChargingSimulator.PriceCurveLoader import load_price
 
 
 ## Defining the function controller(i), for which i is the iteration number
-def controller(i):
+def controller(i, charger_connect):
     # updating tnow
     tnow_initial = param['tnow_initial']
     Ts_data = param['Ts_data']
@@ -69,13 +70,18 @@ def controller(i):
         sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
         for i in range(0, len(new_ev)):
             print("EV" + str(new_ev['ChargerId'][i]) + " comes at time = " + str(tnow))
+            if str(new_ev['ChargerId'][i]) == param['Controlled_ev']:
+                charger_connect = True
             sim_out['EV' + str(new_ev['ChargerId'][i])] = default_Icharge
         sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
 
     leaving_ev = df_ev.index[df_ev['T_departure'] == tnow]
     for leaving_index in leaving_ev:
         print('EV' + str(df_ev.loc[leaving_index, 'ChargerId']) + ' is leaving.')
+        if param['Controlled_ev'] in str(df_ev.loc[leaving_index, 'ChargerId']):
+            charger_connect = False
         df_ev = df_ev.drop(leaving_index)
+
 
     df_ev.reset_index(drop=True, inplace=True)
     # Running the optimization model and return the optimized current to be sent
@@ -87,4 +93,4 @@ def controller(i):
         Icharge = param['Imin']
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
-    return Icharge
+    return Icharge, charger_connect

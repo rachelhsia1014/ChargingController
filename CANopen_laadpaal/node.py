@@ -241,6 +241,21 @@ class laadpaal(canopen.RemoteNode):
         self.sdo[0x214D].raw = Maximum_DC_current_V2G / 10
 
 
+    # trouble shooting functions
+    def Module_uptime(self):
+        return self.sdo[0x2151].raw
 
+    def Switch_OFF_reason_timestamp(self):
+        return self.sdo[0x2152].raw
 
+    def Time_reconnection(self):
+        return self.sdo[0x2241].raw
 
+    def Reconnect_reason(self):
+        return self.sdo[0x2242].raw
+
+    def Warning_status(self):
+        return self.sdo[0x2130].raw
+
+    def Error_source(self):
+        return self.sdo[0x2132].raw
