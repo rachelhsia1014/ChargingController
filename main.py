@@ -15,15 +15,15 @@ sim_out = pd.DataFrame()
 testbed = param['Testbed']
 connect_with_charger = True
 df_Icharge = pd.DataFrame(columns=['Datetime', 'Icharge'])
+charger_connect = False
 set_current = 0
 set_voltage = param["Vcharger"]
-charger_connect = False
+
 
 def send_to_chager(lp, i):
     global connect_with_charger, df_Icharge, set_current, set_voltage
     set_voltage = param["Vcharger"]
 
-    #print('globle set_current updated to: ', set_current)
     # Enable for the 1st iteration and disable at the last iteration
     if i == 0:
         lp.Power_Module_Enable = 'Enable'
@@ -54,7 +54,7 @@ def send_current_periodically():   # send signal every 0.5 secs
             print('Switch off reason:' + str(lp.Turn_off_reason))
             print('Warning status:' + str(lp.Warning_status()))
             print('Error source:' + str(lp.Error_source()))
-            #print('Reconnect reset reason:' + str(lp.Reconnect_reason()))
+
 
 
 # initialize communication with charger and start periodically sending the set current
@@ -70,10 +70,6 @@ if testbed == True:
 # run optimization iterations
 for i in range(0, param['N']):
 
-    #Icharge_set = random.uniform(0.0, 3.0)
-    #random_list.append(Icharge_set)
-    #start = time.time()
-
     set_current, charger_connect = controller(i, charger_connect)
     if charger_connect == False:
         set_current = 0
@@ -81,14 +77,7 @@ for i in range(0, param['N']):
     if testbed == True:
         send_to_chager(lp, i)
         time.sleep(2)
-        #end = time.time()
-        #print('optimazation time: ', end-start)
-        #random_list.append(end-start)
 
-
-
-#df_random = pd.DataFrame(data=random_list)
-#df_random.to_csv('ChargingSimulator/data/random_list')
 lp.disablePower()
 df_Icharge.to_csv('ChargingSimulator/data/RealTime_Icharge')
 print('Simulation completed.')

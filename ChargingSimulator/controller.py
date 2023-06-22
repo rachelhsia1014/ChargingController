@@ -28,7 +28,8 @@ def controller(i, charger_connect):
     df_load = ChargingSimulator.InsiteReportsHandler.InsiteReportsHandler().obtain_loads(tnow, Ts_data)[0]
 
     # price curve in the considered horizon
-    #df_price = load_price()
+    df_price = load_price()
+    df_price = df_price[df_price.index.isin(df_load.index)]
 
     # evs to be scheduled in the horizon
     ev_input = pd.read_csv(param['ev_file'], dayfirst=True, parse_dates=[2, 3], dtype={0: np.int64})

@@ -251,7 +251,7 @@ class laadpaal(canopen.RemoteNode):
     def Time_reconnection(self):
         return self.sdo[0x2241].raw
 
-    def Reconnect_reason(self):
+    def Reconnect_reason(self): # this code is not existing
         return self.sdo[0x2242].raw
 
     def Warning_status(self):
