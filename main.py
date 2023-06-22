@@ -46,9 +46,11 @@ def send_current_periodically():   # send signal every 0.5 secs
     global set_current, set_voltage
     while connect_with_charger:
         try:
-            #status = lp.Power_Module_Status
+            #print(lp.Power_Module_Status) -> not working
+            lp.DC_Output_Voltage
+            lp.DC_Output_Current
             lp.setSetpoint(set_voltage, set_current)
-            time.sleep(0.1)
+            time.sleep(0.08)
         except:
             print('Module uptime:' + str(lp.Module_uptime()))
             print('Switch off reason:' + str(lp.Turn_off_reason))
