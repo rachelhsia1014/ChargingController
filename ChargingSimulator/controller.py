@@ -13,7 +13,6 @@ import pandas as pd
 from datetime import datetime as dt
 import datetime
 import numpy as np
-
 from ChargingSimulator.PriceCurveLoader import load_price
 
 
@@ -87,11 +86,11 @@ def controller(i, charger_connect):
     df_ev.reset_index(drop=True, inplace=True)
     # Running the optimization model and return the optimized current to be sent
     if len(df_ev) > 0:
-          Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data)
+          Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
 
     else:
         print("No ev to schedule at time = " + str(tnow))
         Icharge = param['Imin']
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
-    return Icharge, charger_connect
+    return tnow, Icharge, charger_connect

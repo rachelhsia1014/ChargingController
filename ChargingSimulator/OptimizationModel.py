@@ -5,7 +5,7 @@ import pyomo.environ as pyo
 import datetime
 from ChargingSimulator.parameters import param
 
-def runOptimization(df_load, df_ev, tnow, Ts_data):
+def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
     #converting the datetime object to an integer which can be processed by Pyomo
     #df_ev = df_ev.loc[df_ev['E_requested'] >= 0.01]
     df_ev['T_arrival'] = tnow
@@ -14,7 +14,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
 
     #Checking to see whether or not the arrival time is within the loads dataframe
     df_ev = df_ev[df_ev.index.isin(df_ev['I_arrival'].loc[df_ev['I_arrival'].isin(df_load.index)].index)].copy()
-    dummies  = pd.DataFrame([[param['eff'],param['Imin'],param['Imax'], param['price'], param['Vcharger']]],columns=['eff', 'Imin', 'Imax', 'price', 'Vcharger'],index=['Data'])
+    dummies  = pd.DataFrame([[param['eff'],param['Imin'],param['Imax'], param['Vcharger']]],columns=['eff', 'Imin', 'Imax', 'Vcharger'],index=['Data'])
     
 
     def create_model(input_load, input_ev, dummies, Ts_data):
@@ -30,6 +30,8 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
         model.Pload = Param(model.N, within = NonNegativeReals, mutable = True)
         model.Ppv = Param(model.N, within = Reals, mutable = True)
         model.T = Param(model.N, within = NonNegativeReals, mutable = True)
+        model.price = Param(model.N, within=Reals, mutable=True)
+        model.priceSign = Param(model.N, within=Reals, mutable=True)
     
         model.E_requested = Param(model.V, within=NonNegativeReals, mutable=True)
         model.T_arrival = Param(model.V, within=NonNegativeReals, mutable=True)
@@ -39,7 +41,6 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
         model.eff = Param(model.S, within = NonNegativeReals, mutable = True)
         model.imin = Param(model.S, within = NonNegativeReals, mutable = True)
         model.imax = Param(model.S, within = NonNegativeReals, mutable = True)
-        model.price = Param(model.S, within = NonNegativeReals, mutable = True)
         model.vcharger = Param(model.S, within = NonNegativeReals, mutable = True)
     
         # Update parameters
@@ -47,7 +48,6 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
             model.eff[s] = dummies.loc[s, 'eff']
             model.imin[s] = dummies.loc[s, 'Imin']
             model.imax[s] = dummies.loc[s, 'Imax']
-            model.price[s] = dummies.loc[s, 'price']
             model.vcharger[s] = dummies.loc[s, 'Vcharger']
         
         # Indexed:
@@ -55,6 +55,8 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
             model.T[k] = input_load.index[k]
             model.Pload[k] = input_load['Load'].iloc[k]
             model.Ppv[k] = input_load['PV'].iloc[k]
+            model.price[k] = price_input['Price (Euros/kWh)'].iloc[k]
+            model.priceSign[k] = price_input['sign'].iloc[k]
                 
         for i in model.V:
             model.E_requested[i] = input_ev['E_requested'][i]
@@ -69,6 +71,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
         model.Pcharge = Var(model.N, model.V, within = Reals)
         model.Pev = Var(model.N, model.V, within = Reals)
         model.Eev = Var(model.N, model.V, within = Reals)
+        model.Idiff = Var(model.N, model.V, within=Reals) # for switching
     
         # Creation of constraints
         def Energy(model, k, i):
@@ -101,6 +104,13 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
             else:
                 return model.Icharge[k, i] >= model.imin[s]
 
+        def Current_diff(model, k, i): # for switching
+            if k == 0:
+                return model.Idiff[k, i] == 0
+            else:
+                return model.Idiff[k, i] == (model.Icharge[k, i] - model.Icharge[model.N.prev(k), i]) ** 2
+
+
         model.con_Energy = Constraint(model.N, model.V, rule=Energy)
         model.con_Power_ev = Constraint(model.S, model.N, model.V, rule=Power_ev)
         model.con_P_aggregated = Constraint(model.N, rule=Pev_aggregated)
@@ -108,11 +118,13 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
         model.con_Power_charger = Constraint(model.S, model.N, model.V, rule=Power_charger)
         model.con_Icharge_max = Constraint(model.S, model.N, model.V, rule=Icharge_max)
         model.con_Current = Constraint(model.S, model.N, model.V, rule=Current)
+        model.con_Current_diff = Constraint(model.N, model.V, rule=Current_diff) # for switching
 
 
         def costfunction(model, k):
-            return sum((model.price[s]*model.Pgrid[k])**2 for k in model.N) - 0.4*sum(((1/(1+model.price[s]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
-    
+            #return sum(model.Idiff[k,i] for k in model.N for i in model.V) + sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)  #- 0.4*sum(((1/(1+model.price[s]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
+            return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)  - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
+
         model.obj = Objective(rule=costfunction, sense=minimize)
     
         return model
@@ -162,7 +174,8 @@ def runOptimization(df_load, df_ev, tnow, Ts_data):
             print("EV" + str(df_ev['ChargerId'][i]) + " (requesting " + str(df_ev.iloc[i, 1]) + " kWh) is charged at " + str(round(df_result['Current' + str(df_ev['ChargerId'][i])].loc[str(tnow)], 2)) + "A at " + str(tnow))
             sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
             sim_out.index = pd.to_datetime(sim_out.index)
-            sim_out["EV" + str(df_ev['ChargerId'][i])] = sim_out["EV" + str(df_ev['ChargerId'][i])].combine(df_result['Current' + str(df_ev['ChargerId'][i])], lambda x1, x2: x1 if pd.isna(x2) else x2)
+            sim_out["EV" + str(df_ev['ChargerId'][i])].update(df_result['Current' + str(df_ev['ChargerId'][i])])
+            #sim_out["EV" + str(df_ev['ChargerId'][i])] = sim_out["EV" + str(df_ev['ChargerId'][i])].combine(df_result['Current' + str(df_ev['ChargerId'][i])], lambda x1, x2: x1 if pd.isna(x2) else x2)
             sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
 
         for i in mymodel.V:

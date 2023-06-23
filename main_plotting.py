@@ -6,6 +6,27 @@ from pathlib import Path
 import threading
 import time
 from time import strftime, localtime
+import datetime
+import matplotlib.pyplot as plt
+
+# Prepare for plotting
+plt.ion()   # Enable interactive mode
+plt.figure(figsize=(12, 5))    # Create an empty plot
+plt.xlabel('Time')
+plt.ylabel('Charging current (A)')
+plt.title('EV' + param['Controlled_ev'] + 'Charging Current')
+start_time = datetime.datetime.strptime(param['tnow_initial'], '%Y-%m-%d %H:%M:%S')
+end_time = start_time + datetime.timedelta(minutes=param['Ts_data'] * param['N'])
+datetime_values = [start_time + datetime.timedelta(minutes=5 * i) for i in range(int((end_time - start_time).total_seconds() // 300) + 1)]
+x_ticks_all = range(len(datetime_values))
+x_tick_labels = [dt.strftime('%Y-%m-%d %H:%M:%S') for dt in datetime_values]
+x_ticks = x_ticks_all[::12]
+x_tick_labels = x_tick_labels[::12]
+plt.xticks(x_ticks, x_tick_labels, rotation=45, fontsize=5)
+y = [None] * (param['N'] + 1)
+line, = plt.plot(x_ticks_all, y)
+plt.ylim(0, 35)
+
 
 # starting main
 # variable initialization
@@ -16,7 +37,6 @@ df_Icharge = pd.DataFrame(columns=['Datetime', 'Icharge'])
 charger_connect = False
 set_current = 0
 set_voltage = param["Vcharger"]
-
 
 def send_to_chager(lp, i):
     global connect_with_charger, df_Icharge, set_current, set_voltage
@@ -73,6 +93,12 @@ for i in range(0, param['N']):
     if charger_connect == False:
         set_current = 0
 
+    # update the plot
+    y[i] = set_current
+    line.set_ydata(y)
+    plt.draw()
+    plt.pause(0.1)
+
     if testbed == True:
         send_to_chager(lp, i)
         time.sleep(2)
@@ -82,6 +108,7 @@ if testbed == True:
     df_Icharge.to_csv('ChargingSimulator/data/RealTime_Icharge')
 
 print('Simulation completed.')
+plt.show(block=True)
 
 
 

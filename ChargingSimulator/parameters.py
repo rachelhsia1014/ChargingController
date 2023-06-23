@@ -1,8 +1,8 @@
 param = {
     # Datetime settings
     "tnow_initial": "2022-03-21 06:00:00",  # Simulation starting date
-    "ev_file": "ChargingSimulator/data/ev_march_test.csv",
-    "Controlled_ev": "1",
+    "ev_file": "ChargingSimulator/data/ev_march.csv",
+    "Controlled_ev": "2",
     # EV data file location (ChargingSimulator is needed, since python is run from Matlab folder)
 
     # Controller parameters:
@@ -13,10 +13,9 @@ param = {
 
     # Optimization dummie values:
     "eff": 0.83,  # Total charging efficiency (from charger to EV)
-    "Imin": 0.1,  # Minimum charger current (not used atm)
-    "Imax": 3,  # Maximum charger current
-    "Vcharger": 380,  # Maximum charger voltage
-    "price": 0.44,  # Electricity price
+    "Imin": 6,  # Minimum charger current (not used atm) 0.1
+    "Imax": 32,  # Maximum charger current 3
+    "Vcharger": 230,  # Maximum charger voltage 380
 
     # Troubleshooting
     "E_factor": 1,
