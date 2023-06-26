@@ -70,6 +70,7 @@ if testbed == True:
 for i in range(0, param['N']):
 
     tnow, set_current, charger_connect = controller(i, charger_connect)
+
     if charger_connect == False:
         set_current = 0
 

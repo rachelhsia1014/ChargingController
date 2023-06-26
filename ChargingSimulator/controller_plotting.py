@@ -7,7 +7,7 @@ This file runs all other python files and sends the control values to the charge
 @author: roela
 """
 import ChargingSimulator.InsiteReportsHandler
-import ChargingSimulator.OptimizationModel as opt
+import ChargingSimulator.OptimizationModel_plotting as opt
 from ChargingSimulator.parameters import param
 import pandas as pd
 from datetime import datetime as dt
@@ -17,7 +17,7 @@ from ChargingSimulator.PriceCurveLoader import load_price
 
 
 ## Defining the function controller(i), for which i is the iteration number
-def controller(i, charger_connect):
+def controller(i, charger_connect, ax):
     # updating tnow
     tnow_initial = param['tnow_initial']
     Ts_data = param['Ts_data']
@@ -85,7 +85,7 @@ def controller(i, charger_connect):
     df_ev.reset_index(drop=True, inplace=True)
     # Running the optimization model and return the optimized current to be sent
     if len(df_ev) > 0:
-          Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
+          Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price, ax)
 
     else:
         print("No ev to schedule at time = " + str(tnow))

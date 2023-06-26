@@ -5,7 +5,7 @@ import pyomo.environ as pyo
 import datetime
 from ChargingSimulator.parameters import param
 
-def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
+def runOptimization(df_load, df_ev, tnow, Ts_data, price_input, ax):
     #converting the datetime object to an integer which can be processed by Pyomo
     #df_ev = df_ev.loc[df_ev['E_requested'] >= 0.01]
     df_ev['T_arrival'] = tnow
@@ -122,9 +122,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
 
 
         def costfunction(model, k):
-            return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
-            #return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)
-            #return sum(model.Idiff[k,i] for k in model.N for i in model.V) + sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)  #- 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
+            return sum(model.Idiff[k,i] for k in model.N for i in model.V) + sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 40*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
             #return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)  - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
 
         model.obj = Objective(rule=costfunction, sense=minimize)
@@ -176,9 +174,18 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
             print("EV" + str(df_ev['ChargerId'][i]) + " (requesting " + str(df_ev.iloc[i, 1]) + " kWh) is charged at " + str(round(df_result['Current' + str(df_ev['ChargerId'][i])].loc[str(tnow)], 2)) + "A at " + str(tnow))
             sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
             sim_out.index = pd.to_datetime(sim_out.index)
-            sim_out["EV" + str(df_ev['ChargerId'][i])].update(df_result['Current' + str(df_ev['ChargerId'][i])])
-            #sim_out["EV" + str(df_ev['ChargerId'][i])] = sim_out["EV" + str(df_ev['ChargerId'][i])].combine(df_result['Current' + str(df_ev['ChargerId'][i])], lambda x1, x2: x1 if pd.isna(x2) else x2)
+            sim_out["EV" + str(df_ev['ChargerId'][i])].update(df_result['Current' + str(df_ev['ChargerId'][i])])    #sim_out["EV" + str(df_ev['ChargerId'][i])] = sim_out["EV" + str(df_ev['ChargerId'][i])].combine(df_result['Current' + str(df_ev['ChargerId'][i])], lambda x1, x2: x1 if pd.isna(x2) else x2)
+
+
             sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
+            if str(df_ev['ChargerId'][i]) == param['Controlled_ev']:
+                ax.clear()
+                ax.plot(sim_out.index[:(sim_out.index.get_loc(tnow)+1)], sim_out["EV" + str(df_ev['ChargerId'][i])][:(sim_out.index.get_loc(tnow)+1)], '-o')
+                ax.plot(sim_out.index[(sim_out.index.get_loc(tnow)+1):], sim_out["EV" + str(df_ev['ChargerId'][i])][(sim_out.index.get_loc(tnow)+1):], '--')
+
+                #ax.axvline(x=tnow, color='red', linestyle='--')
+
+                ax.set_title('Time = ' + str(tnow))
 
         for i in mymodel.V:
             df_ev.iloc[i, 1] = df_ev.iloc[i, 1] - df_result['EV' + str(df_ev['ChargerId'][i])][str(tnow + datetime.timedelta(minutes=Ts_data))]

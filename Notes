@@ -1,0 +1,7 @@
+# create a data list with datetime index
+start_time = dt.strptime(tnow_initial, '%Y-%m-%d %H:%M:%S') - datetime.timedelta(minutes=param['Ts_data'])
+end_time = dt.strptime(str(start_time), '%Y-%m-%d %H:%M:%S') + (param['N'] + 1) * datetime.timedelta(
+    minutes=param['Ts_data'])
+time_range = pd.date_range(start=start_time, end=end_time, freq=str(param['Ts_data']) + 'T')
+df = pd.DataFrame(index=time_range)
+df = df.rename(index={df.index[0]: 'Datetime'})
