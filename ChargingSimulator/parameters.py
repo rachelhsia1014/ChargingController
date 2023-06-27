@@ -2,6 +2,7 @@ param = {
     # Datetime settings
     "tnow_initial": "2022-03-21 06:00:00",  # Simulation starting date
     "ev_file": "ChargingSimulator/data/ev_march_test.csv",
+    "Enable_controller": False,
     "Controlled_ev": "1",
     # EV data file location (ChargingSimulator is needed, since python is run from Matlab folder)
 

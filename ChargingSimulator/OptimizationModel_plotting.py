@@ -122,8 +122,8 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input, ax):
 
 
         def costfunction(model, k):
-            return sum(model.Idiff[k,i] for k in model.N for i in model.V) + sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 40*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
-            #return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)  - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
+            #return sum(model.Idiff[k,i] for k in model.N for i in model.V) + sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 40*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
+            return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)  - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
 
         model.obj = Objective(rule=costfunction, sense=minimize)
     

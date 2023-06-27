@@ -10,45 +10,26 @@ from time import strftime, localtime
 # starting main
 # variable initialization
 sim_out = pd.DataFrame()
+df_Icharge = pd.DataFrame(columns=['Datetime', 'Iset', 'Icharger', 'Vcharger', 'Igrid', 'Vgrid'])
 testbed = param['Testbed']
 connect_with_charger = True
-df_Icharge = pd.DataFrame(columns=['Datetime', 'Icharge'])
-charger_connect = False
+ev_present = False
 set_current = 0
 set_voltage = param["Vcharger"]
 
-
-def send_to_chager(lp, i):
-    global connect_with_charger, df_Icharge, set_current, set_voltage
-    set_voltage = param["Vcharger"]
-
-    # Enable for the 1st iteration and disable at the last iteration
-    if i == 0:
-        lp.Power_Module_Enable = 'Enable'
-        print('1st iteration: ' + str(lp.Power_Module_Status))
-
-    if i == param['N'] - 1:
-        print('last iteration')
-        lp.setSetpoint(0, 0)
-        connect_with_charger = False
-
-    if set_current is not None:
-        print(str(i) + 'iteration current sent = ', set_current)
-        time_now = strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))
-        new_df_row = pd.DataFrame([[time_now, set_current]], columns=['Datetime', 'Icharge'])
-        df_Icharge = pd.concat([df_Icharge, new_df_row])
-        lp.setSetpoint(set_voltage, set_current)
-
-
-def send_current_periodically():   # send signal every 0.5 secs
+def send_current_periodically():   # keep sending set current to the charger
     global set_current, set_voltage
     while connect_with_charger:
+        lp.setSetpoint(set_voltage, set_current)
         try:
-            #print(lp.Power_Module_Status) -> not working
-            lp.DC_Output_Voltage
-            lp.DC_Output_Current
-            lp.setSetpoint(set_voltage, set_current)
-            time.sleep(0.08)
+            time_now = strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))
+            Vcharger = lp.DC_Output_Voltage
+            Icharger = lp.DC_Output_Current
+            Igrid = lp.AC_Input_Current
+            Vgrid = lp.AC_Input_Voltage
+            new_df_row = pd.DataFrame([[time_now, set_current, Vcharger, Icharger, Vgrid, Igrid]], columns=['Datetime', 'Iset', 'Icharger', 'Vcharger', 'Igrid', 'Vgrid'])
+            df_Icharge = pd.concat([df_Icharge, new_df_row])
+
         except:
             print('Module uptime:' + str(lp.Module_uptime()))
             print('Switch off reason:' + str(lp.Turn_off_reason))
@@ -69,18 +50,26 @@ if testbed == True:
 # run optimization iterations
 for i in range(0, param['N']):
 
-    tnow, set_current, charger_connect = controller(i, charger_connect)
+    if testbed == True:
+        # Enable for the 1st iteration and disable at the last iteration
+        if i == 0:
+            lp.Power_Module_Enable = 'Enable'
+            print('1st iteration: ' + str(lp.Power_Module_Status))
 
-    if charger_connect == False:
+        if i == param['N'] - 1:
+            print('last iteration')
+            lp.setSetpoint(0, 0)
+            connect_with_charger = False
+
+    tnow, set_current, ev_present = controller(i, ev_present)
+
+    if ev_present == False:
         set_current = 0
 
-    if testbed == True:
-        send_to_chager(lp, i)
-        time.sleep(2)
 
 if testbed == True:
     lp.disablePower()
-    df_Icharge.to_csv('ChargingSimulator/data/RealTime_Icharge')
+    df_Icharge.to_csv('ChargingSimulator/data/RealTime_measurement')
 
 print('Simulation completed.')
 

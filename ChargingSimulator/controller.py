@@ -17,7 +17,7 @@ from ChargingSimulator.PriceCurveLoader import load_price
 
 
 ## Defining the function controller(i), for which i is the iteration number
-def controller(i, charger_connect):
+def controller(i, ev_present):
     # updating tnow
     tnow_initial = param['tnow_initial']
     Ts_data = param['Ts_data']
@@ -70,7 +70,7 @@ def controller(i, charger_connect):
         for i in range(0, len(new_ev)):
             print("EV" + str(new_ev['ChargerId'][i]) + " comes at time = " + str(tnow))
             if str(new_ev['ChargerId'][i]) == param['Controlled_ev']:
-                charger_connect = True
+                ev_present = True
             sim_out['EV' + str(new_ev['ChargerId'][i])] = default_Icharge
         sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
 
@@ -78,18 +78,31 @@ def controller(i, charger_connect):
     for leaving_index in leaving_ev:
         print('EV' + str(df_ev.loc[leaving_index, 'ChargerId']) + ' is leaving.')
         if param['Controlled_ev'] in str(df_ev.loc[leaving_index, 'ChargerId']):
-            charger_connect = False
+            ev_present = False
         df_ev = df_ev.drop(leaving_index)
 
 
     df_ev.reset_index(drop=True, inplace=True)
     # Running the optimization model and return the optimized current to be sent
     if len(df_ev) > 0:
-          Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
+        if param['Enable_controller']:
+            Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
+        else:
+            print("Optimization at time = " + str(tnow))
+            for i in range(len(df_ev)):
+                if df_ev.iloc[i, 1] > 0:
+                    Icharge = param['Imax']
+                    df_ev.iloc[i, 1] = df_ev.iloc[i, 1] - param['Imax'] * param['Vcharger'] / 1000 * param[
+                        'eff'] * Ts_data / 60
+                    print("EV" + str(df_ev['ChargerId'][i]) + " (requesting " + str(
+                        df_ev.iloc[i, 1]) + " kWh) is charged at " + str(Icharge) + "A at " + str(tnow))
+                else:
+                    Icharge = 0
+                    print("EV" + str(df_ev['ChargerId'][i]) + " is fully charged at " + str(tnow))
 
     else:
         print("No ev to schedule at time = " + str(tnow))
         Icharge = param['Imin']
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
-    return tnow, Icharge, charger_connect
+    return tnow, Icharge, ev_present
