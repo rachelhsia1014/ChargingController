@@ -85,7 +85,22 @@ def controller(i, charger_connect):
     df_ev.reset_index(drop=True, inplace=True)
     # Running the optimization model and return the optimized current to be sent
     if len(df_ev) > 0:
+        if param['Enable_controller']:
           Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
+        else:
+            print("Optimization at time = " + str(tnow))
+            for i in range(len(df_ev)):
+                if df_ev.iloc[i, 1] > 0:
+                    Icharge = param['Imax']
+                    print("EV" + str(df_ev['ChargerId'][i]) + " (requesting " + str(df_ev.iloc[i, 1]) + " kWh) is charged at " + str(Icharge) + "A at " + str(tnow))
+                    df_ev.iloc[i, 1] = df_ev.iloc[i, 1] - param['Vcharger'] * param['Imax'] / 1000 * param['eff'] * Ts_data / 60
+                    if df_ev.iloc[i, 1] < 0 or round(df_ev.iloc[i, 1], 2) == 0.00:
+                        df_ev.iloc[i, 1] = 0
+                else:
+                    Icharge = 0
+                    print("EV" + str(df_ev['ChargerId'][i]) + " is fully charged at time " + str(tnow))
+
+            df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
     else:
         print("No ev to schedule at time = " + str(tnow))
