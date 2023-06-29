@@ -84,9 +84,10 @@ def controller(i, charger_connect):
 
     df_ev.reset_index(drop=True, inplace=True)
     # Running the optimization model and return the optimized current to be sent
+    sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
     if len(df_ev) > 0:
         if param['Enable_controller']:
-          Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
+            Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
         else:
             print("Optimization at time = " + str(tnow))
             for i in range(len(df_ev)):
@@ -99,7 +100,9 @@ def controller(i, charger_connect):
                 else:
                     Icharge = 0
                     print("EV" + str(df_ev['ChargerId'][i]) + " is fully charged at time " + str(tnow))
+                sim_out.loc[str(tnow), 'EV' + str(df_ev['ChargerId'][i])] = Icharge
 
+            sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
             df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
     else:

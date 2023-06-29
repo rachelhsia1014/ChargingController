@@ -12,15 +12,14 @@ from time import strftime, localtime
 sim_out = pd.DataFrame()
 testbed = param['Testbed']
 connect_with_charger = True
-df_Icharge = pd.DataFrame(columns=['Datetime', 'Icharge'])
+df_measurement = pd.DataFrame(columns=['Datetime', 'Iset', 'Igrid', 'Vgrid', 'Icharger', 'Vcharger'])
 charger_connect = False
 set_current = 0
 set_voltage = param["Vcharger"]
 
 
 def send_to_chager(lp, i):
-    global connect_with_charger, df_Icharge, set_current, set_voltage
-    set_voltage = param["Vcharger"]
+    global connect_with_charger, df_measurement, set_current, set_voltage
 
     # Enable for the 1st iteration and disable at the last iteration
     if i == 0:
@@ -35,8 +34,12 @@ def send_to_chager(lp, i):
     if set_current is not None:
         print(str(i) + 'iteration current sent = ', set_current)
         time_now = strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))
-        new_df_row = pd.DataFrame([[time_now, set_current]], columns=['Datetime', 'Icharge'])
-        df_Icharge = pd.concat([df_Icharge, new_df_row])
+        Igrid = lp.AC_Input_Current
+        Vgrid = lp.AC_Input_Voltage
+        Vcharger = lp.DC_Output_Voltage
+        Icharger = lp.DC_Output_Current
+        new_df_row = pd.DataFrame([[time_now, set_current, Igrid, Vgrid, Icharger, Vcharger]], columns=['Datetime', 'Iset', 'Igrid', 'Vgrid', 'Icharger', 'Vcharger'])
+        df_measurement = pd.concat([df_measurement, new_df_row])
         lp.setSetpoint(set_voltage, set_current)
 
 
@@ -80,7 +83,7 @@ for i in range(0, param['N']):
 
 if testbed == True:
     lp.disablePower()
-    df_Icharge.to_csv('ChargingSimulator/data/RealTime_Icharge')
+    df_measurement.to_csv('ChargingSimulator/data/realtime_measurement')
 
 print('Simulation completed.')
 
