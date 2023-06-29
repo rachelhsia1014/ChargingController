@@ -4,23 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6e08f63a-6890-4c9c-ae04-3423b0eb95c4" name="Changes" comment="Price curve added in controller.py, but not in optimization.">
-      <change afterPath="$PROJECT_DIR$/main_plotting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/V2XTestbed_local.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/V2XTestbed_local.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="6e08f63a-6890-4c9c-ae04-3423b0eb95c4" name="Changes" comment="Add uncontrolled script.">
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/PriceCurveLoader.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/PriceCurveLoader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/_InsideReportsToken" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/_InsideReportsToken" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/ev.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/data/ev.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/ev_march.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/data/ev_march.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/random_list_10sec" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/random_list_1sec" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/ev_march_test.csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/sim_out.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/data/sim_out.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/parameters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Result/sim_out_0619test (3evs).csv" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_test.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,12 +45,13 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/avans/PycharmProjects/ChargingController&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Rachel/OneDrive - TU Eindhoven/Kropman project/5-Code/V2XTestbed/ChargingSimulator&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.fileTypes&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Rachel\OneDrive - TU Eindhoven\Kropman project\5-Code\V2XTestbed\ChargingSimulator" />
       <recent name="C:\Users\avans\PycharmProjects\ChargingController\ChargingSimulator\data" />
       <recent name="C:\Users\avans\PycharmProjects\ChargingController" />
     </key>
@@ -110,7 +107,35 @@
       <option name="project" value="LOCAL" />
       <updated>1687425541804</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Plot the simulation with updated values from each iteration.">
+      <created>1687524418067</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1687524418067</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Plot the simulation with updated values from each iteration.">
+      <created>1687773784252</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1687773784252</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Add uncontrolled script.">
+      <created>1687875225617</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1687875225617</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Add uncontrolled script.">
+      <created>1688034913557</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1688034913557</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -129,20 +154,27 @@
     <MESSAGE value="Controller tested on testbed." />
     <MESSAGE value="Push test." />
     <MESSAGE value="Price curve added in controller.py, but not in optimization." />
-    <option name="LAST_COMMIT_MESSAGE" value="Price curve added in controller.py, but not in optimization." />
+    <MESSAGE value="Plot the simulation with updated values from each iteration." />
+    <MESSAGE value="Add uncontrolled script." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add uncontrolled script." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/main_plotting.py</url>
-          <line>81</line>
-          <option name="timeStamp" value="36" />
+          <url>file://$PROJECT_DIR$/ChargingSimulator/controller_plotting.py</url>
+          <line>91</line>
+          <option name="timeStamp" value="57" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ChargingSimulator/OptimizationModel.py</url>
-          <line>176</line>
-          <option name="timeStamp" value="46" />
+          <url>file://$PROJECT_DIR$/ChargingSimulator/controller.py</url>
+          <line>102</line>
+          <option name="timeStamp" value="59" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ChargingSimulator/PriceCurveLoader.py</url>
+          <line>5</line>
+          <option name="timeStamp" value="60" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
