@@ -12,14 +12,16 @@ from time import strftime, localtime
 sim_out = pd.DataFrame()
 testbed = param['Testbed']
 connect_with_charger = True
-df_measurement = pd.DataFrame(columns=['Datetime', 'Iset', 'Igrid', 'Vgrid', 'Icharger', 'Vcharger'])
+#df_measurement = pd.DataFrame(columns=['Datetime', 'Iset', 'Igrid_avg', 'Igrid_L1', 'Igrid_L2', 'Igrid_L3','Vgrid_avg', 'Vgrid_L1', 'Vgrid_L2', 'Vgrid_L3','Icharger', 'Vcharger'])
+df_measurement = pd.DataFrame(columns=['Datetime', 'Iset', 'Igrid_avg','Vgrid_avg','Icharger', 'Vcharger'])
+df_measurement.to_csv('ChargingSimulator/data/realtime_measurement.csv', header=True)
 charger_connect = False
 set_current = 0
 set_voltage = param["Vcharger"]
 
 
 def send_to_chager(lp, i):
-    global connect_with_charger, df_measurement, set_current, set_voltage
+    global connect_with_charger, set_current, set_voltage
 
     # Enable for the 1st iteration and disable at the last iteration
     if i == 0:
@@ -33,30 +35,49 @@ def send_to_chager(lp, i):
 
     if set_current is not None:
         print(str(i) + 'iteration current sent = ', set_current)
+        df_measurement = pd.read_csv('ChargingSimulator/data/realtime_measurement.csv')
         time_now = strftime('%Y-%m-%d %H:%M:%S', localtime(time.time()))
-        Igrid = lp.AC_Input_Current
-        Vgrid = lp.AC_Input_Voltage
-        Vcharger = lp.DC_Output_Voltage
-        Icharger = lp.DC_Output_Current
-        new_df_row = pd.DataFrame([[time_now, set_current, Igrid, Vgrid, Icharger, Vcharger]], columns=['Datetime', 'Iset', 'Igrid', 'Vgrid', 'Icharger', 'Vcharger'])
+        try:
+            Igrid_avg = lp.AC_Input_Current / 100
+            Vgrid_avg = lp.AC_Input_Voltage / 100
+            Vcharger = lp.DC_Output_Voltage / 100
+            Icharger = lp.DC_Output_Current / 100
+            #Vgrid_L1 = lp.AC_Input_Voltage_L1 /100
+            #Vgrid_L2 = lp.AC_Input_Voltage_L2 /100
+            #Vgrid_L3 = lp.AC_Input_Voltage_L3 /100
+            #Igrid_L1 = lp.AC_Input_Current_L1 /100
+            #Igrid_L2 = lp.AC_Input_Current_L2 /100
+            #Igrid_L3 = lp.AC_Input_Current_L3 /100
+
+        except:
+            Igrid_avg = 0
+            Igrid_L1 = 0
+            Igrid_L2 = 0
+            Igrid_L3 = 0
+            Vgrid_avg = 0
+            Vgrid_L1 = 0
+            Vgrid_L2 = 0
+            Vgrid_L3 = 0
+            Vcharger = 0
+            Icharger = 0
+        new_df_row = pd.DataFrame([[time_now, set_current, Igrid_avg, Vgrid_avg, Icharger, Vcharger]], columns=['Datetime', 'Iset', 'Igrid_avg', 'Vgrid_avg','Icharger', 'Vcharger'])
         df_measurement = pd.concat([df_measurement, new_df_row])
+        df_measurement.to_csv('ChargingSimulator/data/realtime_measurement.csv', header=True, index=False)
         lp.setSetpoint(set_voltage, set_current)
 
 
-def send_current_periodically():   # send signal every 0.5 secs
+def send_current_periodically():   # send signal every 0.08 secs
     global set_current, set_voltage
     while connect_with_charger:
         try:
-            #print(lp.Power_Module_Status) -> not working
-            lp.DC_Output_Voltage
-            lp.DC_Output_Current
             lp.setSetpoint(set_voltage, set_current)
             time.sleep(0.08)
         except:
-            print('Module uptime:' + str(lp.Module_uptime()))
-            print('Switch off reason:' + str(lp.Turn_off_reason))
-            print('Warning status:' + str(lp.Warning_status()))
-            print('Error source:' + str(lp.Error_source()))
+            print('conflict!!')
+            #print('Module uptime:' + str(lp.Module_uptime()))
+            #print('Switch off reason:' + str(lp.Turn_off_reason))
+            #print('Warning status:' + str(lp.Warning_status()))
+            #print('Error source:' + str(lp.Error_source()))
 
 
 # initialize communication with charger and start periodically sending the set current
@@ -83,7 +104,7 @@ for i in range(0, param['N']):
 
 if testbed == True:
     lp.disablePower()
-    df_measurement.to_csv('ChargingSimulator/data/realtime_measurement')
+    #df_measurement.to_csv('ChargingSimulator/data/realtime_measurement')
 
 print('Simulation completed.')
 

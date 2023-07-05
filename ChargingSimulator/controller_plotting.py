@@ -86,7 +86,7 @@ def controller(i, charger_connect, ax):
     # Running the optimization model and return the optimized current to be sent
     if len(df_ev) > 0:
         if param['Enable_controller']:
-            Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
+            Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price, ax)
         else:
 
             print("Optimization at time = " + str(tnow))

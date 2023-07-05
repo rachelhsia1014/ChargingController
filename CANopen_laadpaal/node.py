@@ -122,12 +122,45 @@ class laadpaal(canopen.RemoteNode):
         """
         return self.sdo[0x2105].raw * 10
 
+    def AC_Input_Voltage_L1(self):
+        """
+        This read-only object contains the measured input voltage of the three AC phases (line-neutral).
+        """
+        return self.sdo[0x2121].raw * 10
+
+    def AC_Input_Voltage_L2(self):
+        """
+        This read-only object contains the measured input voltage of the three AC phases (line-neutral).
+        """
+        return self.sdo[0x2122].raw * 10
+    def AC_Input_Voltage_L3(self):
+        """
+        This read-only object contains the measured input voltage of the three AC phases (line-neutral).
+        """
+        return self.sdo[0x2123].raw * 10
     @property
     def AC_Input_Current(self):
         """
         This read-only object contains the measured average input current of the three AC phases
         """
         return self.sdo[0x2106].raw * 10
+
+    def AC_Input_Current_L1(self):
+        """
+        This read-only object contains the measured input voltage of the three AC phases (line-neutral).
+        """
+        return self.sdo[0x2124].raw * 10
+
+    def AC_Input_Current_L2(self):
+        """
+        This read-only object contains the measured input voltage of the three AC phases (line-neutral).
+        """
+        return self.sdo[0x2125].raw * 10
+    def AC_Input_Current_L3(self):
+        """
+        This read-only object contains the measured input voltage of the three AC phases (line-neutral).
+        """
+        return self.sdo[0x2126].raw * 10
 
     @property
     def DC_Output_Voltage(self):

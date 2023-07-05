@@ -122,6 +122,7 @@ class InsiteReportsHandler:
             df_load.drop(['Kracht', 'BMS', 'AutoA', 'AutoV', 'Light', 'EV'], axis=1, inplace=True)
             df_load['Load'] = df_load['Load'].mask(df_load['Load'] < 0, 0)
 
+
             
         except Exception as current_error:
             print("Failed obtaining loads. Error: {}".format(current_error))

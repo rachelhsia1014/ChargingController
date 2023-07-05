@@ -17,7 +17,7 @@ rpc_login = {'key': 'cfb8bc47_e446_a832_cde0_2c6c9036c151',
 
 def loadData():
     # Here you can specificy a folder to store the data
-    DIR = ""
+    DIR = "C:/Users/avans/PycharmProjects/ChargingController/ChargingSimulator/data"
 
     b = requests.post(rpc_login['url'] + 'evse/welkomkropman', data=rpc_login)
     welkomkropman = json.loads(b.text)
@@ -77,5 +77,5 @@ def loadData():
     
 
 
-
+df_ev = loadData()
 
