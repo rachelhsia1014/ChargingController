@@ -42,7 +42,7 @@ def controller(i, charger_connect):
         # create a file to store the calculated current schedule
         df = pd.DataFrame()
         df['Building Load (kWh)'] = df_load['Load']
-        df['PV (kWh)'] = df_load['PV'] * param['PV_scale_factor']
+        df['PV (kWh)'] = df_load['PV']
         df['Price (Euros/kWh)'] = df_price['Price (Euros/kWh)']
         df.index = pd.to_datetime(df.index)
         df.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
@@ -59,7 +59,6 @@ def controller(i, charger_connect):
     else:  # check feasibility and then add to the ev.csv, which is the list with involved evs
         new_ev = new_ev.reset_index()
         new_ev.drop('index', axis=1, inplace=True)
-        # new_ev['E_requested'] = new_ev['E_requested'] * 1.1 # request more to ensure enough delivery
         new_ev['E_requested'] = new_ev['E_requested'].astype(float)
         mask = new_ev['E_requested'] > ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * ( param['Vcharger'] * param['Imax'] ) / 1000 * param['eff'] * param['E_factor']
         new_ev.loc[mask, 'E_requested'] = ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * ( param['Vcharger'] * param['Imax'] ) / 1000 * param['eff'] * param['E_factor']
@@ -97,7 +96,6 @@ def controller(i, charger_connect):
             print("Optimization at time = " + str(tnow))
             for i in range(len(df_ev)):
                 if df_ev.iloc[i, 1] > 0:
-                    #if str(df_ev['ChargerId'][i]) == param['Controlled_ev']:
                     Icharge = param['Imax']
                     print("EV" + str(df_ev['ChargerId'][i]) + " (requesting " + str(
                         df_ev.iloc[i, 1]) + " kWh) is charged at " + str(Icharge) + "A at " + str(tnow))
@@ -109,6 +107,7 @@ def controller(i, charger_connect):
                         Icharge = 0
                     print("EV" + str(df_ev['ChargerId'][i]) + " is fully charged at time " + str(tnow))
                 sim_out.loc[str(tnow), 'EV' + str(df_ev['ChargerId'][i]) + ' (A)'] = Icharge
+                sim_out.loc[str(tnow), 'EV' + str(df_ev['ChargerId'][i]) + ' (kW)'] = Icharge * param['Vcharger'] / 1000 * param['eff']
 
             sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
             df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
