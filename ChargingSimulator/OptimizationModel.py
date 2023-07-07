@@ -54,7 +54,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
         for k in model.N:
             model.T[k] = input_load.index[k]
             model.Pload[k] = input_load['Load'].iloc[k]
-            model.Ppv[k] = input_load['PV'].iloc[k]
+            model.Ppv[k] = input_load['PV'].iloc[k] * param['PV_scale_factor']
             model.price[k] = price_input['Price (Euros/kWh)'].iloc[k]
             model.priceSign[k] = price_input['sign'].iloc[k]
                 
