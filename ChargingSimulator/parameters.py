@@ -1,11 +1,11 @@
 param = {
     # Datetime settings
-    "tnow_initial": "2022-12-12 06:00:00",  # Simulation starting date
-    "ev_file": "ChargingSimulator/data/ev_december.csv",
-    "price_file": "ChargingSimulator/data/Energy_price__december.csv",
+    "tnow_initial": "2022-03-21 06:00:00",  # Simulation starting date
+    "ev_file": "ChargingSimulator/data/ev_march.csv",
+    "price_file": "ChargingSimulator/data/Energy_price__20220310_20220331.csv",
     "Enable_controller": True,
     "Controlled_ev": "2",
-    "PV_scale_factor": 1,
+    "PV_scale_factor": 2.1,
     # EV data file location (ChargingSimulator is needed, since python is run from Matlab folder)
 
     # Controller parameters:

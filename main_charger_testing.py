@@ -12,6 +12,7 @@ from time import strftime, localtime
 sim_out = pd.DataFrame()
 testbed = param['Testbed']
 connect_with_charger = True
+#df_measurement = pd.DataFrame(columns=['Datetime', 'Iset', 'Igrid_avg', 'Igrid_L1', 'Igrid_L2', 'Igrid_L3','Vgrid_avg', 'Vgrid_L1', 'Vgrid_L2', 'Vgrid_L3','Icharger', 'Vcharger'])
 df_measurement = pd.DataFrame(columns=['Datetime', 'Iset', 'Igrid_avg','Vgrid_avg','Icharger', 'Vcharger'])
 df_measurement.to_csv('ChargingSimulator/data/realtime_measurement.csv', header=True)
 charger_connect = False
@@ -41,12 +42,26 @@ def send_to_chager(lp, i):
             Vgrid_avg = lp.AC_Input_Voltage / 100
             Vcharger = lp.DC_Output_Voltage / 100
             Icharger = lp.DC_Output_Current / 100
+            # Vgrid_L1 = lp.AC_Input_Voltage_L1 /100
+            # Vgrid_L2 = lp.AC_Input_Voltage_L2 /100
+            # Vgrid_L3 = lp.AC_Input_Voltage_L3 /100
+            # Igrid_L1 = lp.AC_Input_Current_L1 /100
+            # Igrid_L2 = lp.AC_Input_Current_L2 /100
+            # Igrid_L3 = lp.AC_Input_Current_L3 /100
+
         except:
             Igrid_avg = 0
+            Igrid_L1 = 0
+            Igrid_L2 = 0
+            Igrid_L3 = 0
             Vgrid_avg = 0
+            Vgrid_L1 = 0
+            Vgrid_L2 = 0
+            Vgrid_L3 = 0
             Vcharger = 0
             Icharger = 0
-        new_df_row = pd.DataFrame([[time_now, set_current, Igrid_avg, Vgrid_avg, Icharger, Vcharger]], columns=['Datetime', 'Iset', 'Igrid_avg', 'Vgrid_avg','Icharger', 'Vcharger'])
+        new_df_row = pd.DataFrame([[time_now, set_current, Igrid_avg, Vgrid_avg, Icharger, Vcharger]],
+                                  columns=['Datetime', 'Iset', 'Igrid_avg', 'Vgrid_avg', 'Icharger', 'Vcharger'])
         df_measurement = pd.concat([df_measurement, new_df_row])
         df_measurement.to_csv('ChargingSimulator/data/realtime_measurement.csv', header=True, index=False)
         lp.setSetpoint(set_voltage, set_current)
@@ -60,10 +75,7 @@ def send_current_periodically():   # send signal every 0.08 secs
             time.sleep(0.08)
         except:
             print('conflict!!')
-            #print('Module uptime:' + str(lp.Module_uptime()))
-            #print('Switch off reason:' + str(lp.Turn_off_reason))
-            #print('Warning status:' + str(lp.Warning_status()))
-            #print('Error source:' + str(lp.Error_source()))
+
 
 
 # initialize communication with charger and start periodically sending the set current
@@ -77,17 +89,13 @@ if testbed == True:
     send_current_thread.start()
 
 # run optimization iterations
-for i in range(0, param['N']):
+for i in range(0, 5):
 
-    tnow, set_current, charger_connect = controller(i, charger_connect)
-
-    if charger_connect == False:
-        set_current = 0
-
+    set_current = i
     if testbed == True:
         send_to_chager(lp, i)
         time.sleep(2)
-
+    time.sleep(5)
 if testbed == True:
     lp.disablePower()
 

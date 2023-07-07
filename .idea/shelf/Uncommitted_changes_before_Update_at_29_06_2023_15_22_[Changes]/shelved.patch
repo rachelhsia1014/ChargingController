@@ -1,0 +1,15 @@
+Index: ChargingSimulator/data/ev_march_test.csv
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>ChargerId,E_requested,T_arrival,T_departure\r\n2,20,21/03/2022 07:45,21/03/2022 14:15\r\n1,20,21/03/2022 08:30,21/03/2022 16:45\r\n0,20,21/03/2022 07:45,21/03/2022 14:30\r\n\r\n
+===================================================================
+diff --git a/ChargingSimulator/data/ev_march_test.csv b/ChargingSimulator/data/ev_march_test.csv
+--- a/ChargingSimulator/data/ev_march_test.csv	
++++ b/ChargingSimulator/data/ev_march_test.csv	
+@@ -1,5 +1,5 @@
+ ChargerId,E_requested,T_arrival,T_departure
+-2,20,21/03/2022 07:45,21/03/2022 14:15
++2,20,21/03/2022 06:00,21/03/2022 14:15
+ 1,20,21/03/2022 08:30,21/03/2022 16:45
+ 0,20,21/03/2022 07:45,21/03/2022 14:30
+ 

@@ -54,7 +54,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
         for k in model.N:
             model.T[k] = input_load.index[k]
             model.Pload[k] = input_load['Load'].iloc[k]
-            model.Ppv[k] = input_load['PV'].iloc[k] * param['PV_scale_factor']
+            model.Ppv[k] = input_load['PV'].iloc[k]
             model.price[k] = price_input['Price (Euros/kWh)'].iloc[k]
             model.priceSign[k] = price_input['sign'].iloc[k]
                 
@@ -177,7 +177,6 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
             sim_out.index = pd.to_datetime(sim_out.index)
             sim_out["EV" + str(df_ev['ChargerId'][i]) + ' (A)'].update(df_result['Current' + str(df_ev['ChargerId'][i])])
             sim_out["EV" + str(df_ev['ChargerId'][i]) + ' (kW)'].update(df_result['PEV' + str(df_ev['ChargerId'][i])])
-            #sim_out["EV" + str(df_ev['ChargerId'][i])] = sim_out["EV" + str(df_ev['ChargerId'][i])].combine(df_result['Current' + str(df_ev['ChargerId'][i])], lambda x1, x2: x1 if pd.isna(x2) else x2)
             sim_out.to_csv('ChargingSimulator/data/sim_out.csv', header=True, index=True)
 
         for i in mymodel.V:
@@ -186,7 +185,6 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
                 df_ev.iloc[i, 1] = 0
 
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
-        #print('ev status updated.')
 
 
     except Exception as SolverError:
