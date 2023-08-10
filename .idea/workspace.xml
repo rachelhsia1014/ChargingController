@@ -4,16 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6e08f63a-6890-4c9c-ae04-3423b0eb95c4" name="Changes" comment="Final test fixes.">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_07_2023_13_27__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_07_2023_13_27__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_06_2023_15_22__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_29_06_2023_15_22__Changes_.xml" afterDir="false" />
+    <list default="true" id="6e08f63a-6890-4c9c-ae04-3423b0eb95c4" name="Changes" comment="Backup push.">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_07_2023_09_38_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_07_2023_09_38__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_07_2023_13_27_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_07_2023_13_27__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/_InsideReportsToken" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/_InsideReportsToken" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/ev.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/data/ev.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/sim_out.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/data/sim_out.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/parameters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Result/Result _new.xlsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Result/Result.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Result/Result.xlsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -142,7 +145,14 @@
       <option name="project" value="LOCAL" />
       <updated>1688572492946</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Backup push.">
+      <created>1689090311950</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1689090311950</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -162,7 +172,8 @@
     <MESSAGE value="Push test." />
     <MESSAGE value="Price curve added in controller.py, but not in optimization." />
     <MESSAGE value="Final tests." />
-    <option name="LAST_COMMIT_MESSAGE" value="Final tests." />
+    <MESSAGE value="Backup push." />
+    <option name="LAST_COMMIT_MESSAGE" value="Backup push." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

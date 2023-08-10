@@ -14,7 +14,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
 
     #Checking to see whether or not the arrival time is within the loads dataframe
     df_ev = df_ev[df_ev.index.isin(df_ev['I_arrival'].loc[df_ev['I_arrival'].isin(df_load.index)].index)].copy()
-    dummies  = pd.DataFrame([[param['eff'],param['Imin'],param['Imax'], param['Vcharger']]],columns=['eff', 'Imin', 'Imax', 'Vcharger'],index=['Data'])
+    dummies  = pd.DataFrame([[param['eff_battery'], param['eff_charger'], param['Imin'], param['Imax'], param['Vcharger']]],columns=['eff_battery', 'eff_charger', 'Imin', 'Imax', 'Vcharger'],index=['Data'])
     
 
     def create_model(input_load, input_ev, dummies, Ts_data):
@@ -38,14 +38,16 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
         model.T_departure = Param(model.V, within=NonNegativeReals, mutable=True)
         model.P_previous = Param(model.V, within=NonNegativeReals, mutable=True)
         
-        model.eff = Param(model.S, within = NonNegativeReals, mutable = True)
+        model.eff_battery = Param(model.S, within = NonNegativeReals, mutable = True)
+        model.eff_charger = Param(model.S, within=NonNegativeReals, mutable=True)
         model.imin = Param(model.S, within = NonNegativeReals, mutable = True)
         model.imax = Param(model.S, within = NonNegativeReals, mutable = True)
         model.vcharger = Param(model.S, within = NonNegativeReals, mutable = True)
     
         # Update parameters
         for s in model.S:
-            model.eff[s] = dummies.loc[s, 'eff']
+            model.eff_battery[s] = dummies.loc[s, 'eff_battery']
+            model.eff_charger[s] = dummies.loc[s, 'eff_charger']
             model.imin[s] = dummies.loc[s, 'Imin']
             model.imax[s] = dummies.loc[s, 'Imax']
             model.vcharger[s] = dummies.loc[s, 'Vcharger']
@@ -83,10 +85,10 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
                 return model.Eev[model.N.prev(k),i] + (model.Pev[model.N.prev(k), i]*Ts_data/60) == model.E_requested[i]
 
         def Power_ev(model, s, k, i):
-            return model.Pev[k, i] == model.eff[s] * model.Pcharge[k, i]
+            return model.Pev[k, i] == model.eff_battery[s] * model.Pcharge[k, i]
 
         def Pev_aggregated(model, k):
-            return model.Pevtot[k] == sum(model.Pcharge[k, i] for i in model.V)
+            return model.Pevtot[k] == sum(model.Pcharge[k, i]/model.eff_charger[s] for i in model.V)
             
         def Balance(model, k):
             return model.Pgrid[k] == model.Pload[k] + model.Ppv[k] + model.Pevtot[k]
@@ -122,9 +124,9 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
 
 
         def costfunction(model, k):
-            return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)
+            #return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)
             #return sum(model.Idiff[k,i] for k in model.N for i in model.V) + sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 40*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
-            #return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
+            return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
 
         model.obj = Objective(rule=costfunction, sense=minimize)
     

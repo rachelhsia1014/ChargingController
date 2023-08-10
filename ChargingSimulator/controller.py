@@ -60,8 +60,8 @@ def controller(i, charger_connect):
         new_ev = new_ev.reset_index()
         new_ev.drop('index', axis=1, inplace=True)
         new_ev['E_requested'] = new_ev['E_requested'].astype(float)
-        mask = new_ev['E_requested'] > ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * ( param['Vcharger'] * param['Imax'] ) / 1000 * param['eff'] * param['E_factor']
-        new_ev.loc[mask, 'E_requested'] = ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * ( param['Vcharger'] * param['Imax'] ) / 1000 * param['eff'] * param['E_factor']
+        mask = new_ev['E_requested'] > ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * ( param['Vcharger'] * param['Imax'] ) / 1000 * param['eff_battery'] * param['E_factor']
+        new_ev.loc[mask, 'E_requested'] = ((new_ev['T_departure'] - new_ev['T_arrival']).dt.seconds / 3600) * ( param['Vcharger'] * param['Imax'] ) / 1000 * param['eff_battery'] * param['E_factor']
 
 
         df_ev = pd.concat([ev_status, new_ev], ignore_index=False)
