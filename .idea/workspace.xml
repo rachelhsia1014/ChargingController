@@ -5,19 +5,31 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6e08f63a-6890-4c9c-ae04-3423b0eb95c4" name="Changes" comment="Backup push.">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_07_2023_09_38_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_06_07_2023_09_38__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_07_2023_13_27_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_07_07_2023_13_27__Changes_.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChargingSimulator/data/ev_june_test.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/V2XTestbed_local.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/V2XTestbed_local.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel_bidirectional.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/OptimizationModel_plotting.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/_InsideReportsToken" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/_InsideReportsToken" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/ev.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/data/ev.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/controller_bidirectional.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/controller_plotting.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/data/sim_out.csv" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/data/sim_out.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ChargingSimulator/parameters.py" beforeDir="false" afterPath="$PROJECT_DIR$/ChargingSimulator/parameters.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Result/Result _new.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChargingSimulator/uncontrolled.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cinergia/MEATURED_Emulator charging current.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cinergia/bat emu cinergia.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modbus reader/Read_SOC.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Modbus reader/Read_power_meter.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Notes" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Result/Result.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Result/Result.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Result/sim_out.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/disable.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_bidirectional.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_charger_testing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_plotting.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pymodbus_test.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,12 +59,13 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/avans/PycharmProjects/ChargingController&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Rachel/OneDrive - TU Eindhoven/Kropman project/5-Code/V2XTestbed/ChargingSimulator/data&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;preferences.fileTypes&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Rachel\OneDrive - TU Eindhoven\Kropman project\5-Code\V2XTestbed\ChargingSimulator\data" />
       <recent name="C:\Users\avans\PycharmProjects\ChargingController" />
       <recent name="C:\Users\avans\PycharmProjects\ChargingController\ChargingSimulator\data" />
     </key>
@@ -152,7 +165,14 @@
       <option name="project" value="LOCAL" />
       <updated>1689090311950</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Backup push.">
+      <created>1691704459926</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1691704459926</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -177,13 +197,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/main_plotting.py</url>
-          <line>81</line>
-          <option name="timeStamp" value="36" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">

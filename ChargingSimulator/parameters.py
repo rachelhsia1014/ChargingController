@@ -1,8 +1,8 @@
 param = {
     # Datetime settings
-    "tnow_initial": "2022-12-12 06:00:00",  # Simulation starting date
-    "ev_file": "ChargingSimulator/data/ev_december.csv",
-    "price_file": "ChargingSimulator/data/Energy_price__december.csv",
+    "tnow_initial": "2022-03-21 06:00:00",  # Simulation starting date
+    "ev_file": "ChargingSimulator/data/ev_march.csv",
+    "price_file": "ChargingSimulator/data/Energy_price__20220310_20220331.csv",
     "Enable_controller": True,
     "Controlled_ev": "2",
     "PV_scale_factor": 1,
@@ -19,7 +19,7 @@ param = {
     "eff_charger": 0.88,  # charger efficiency
     "Imin": 6,  # Minimum charger current (not used atm) 0.1
     "Imax": 20,  # Maximum charger current 3
-    "Vcharger": 350,  # Maximum charger voltage 350
+    "Vcharger": 380,  # Maximum charger voltage 350
 
     # Troubleshooting
     "E_factor": 1,
