@@ -60,10 +60,6 @@ def send_current_periodically():   # send signal every 0.08 secs
             time.sleep(0.08)
         except:
             print('conflict!!')
-            #print('Module uptime:' + str(lp.Module_uptime()))
-            #print('Switch off reason:' + str(lp.Turn_off_reason))
-            #print('Warning status:' + str(lp.Warning_status()))
-            #print('Error source:' + str(lp.Error_source()))
 
 
 # initialize communication with charger and start periodically sending the set current
