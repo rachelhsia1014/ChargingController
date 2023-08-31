@@ -1,8 +1,9 @@
 param = {
     # Datetime settings
-    "tnow_initial": "2022-03-21 06:00:00",  # Simulation starting date
-    "ev_file": "ChargingSimulator/data/ev_march.csv",
-    "price_file": "ChargingSimulator/data/Energy_price__20220310_20220331.csv",
+    "tnow_initial": "2022-12-12 06:00:00",  # Simulation starting date
+    "ev_file": "ChargingSimulator/data/ev_data.csv", # please check if the data corresponds to the tnow_intital
+    "load_file": "ChargingSimulator/data/load_data.csv",
+    "price_file": "ChargingSimulator/data/price_data.csv",
     "Enable_controller": True,
     "Controlled_ev": "2",
     "PV_scale_factor": 1,

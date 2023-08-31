@@ -1,5 +1,5 @@
 import pandas as pd
-from ChargingSimulator.controller import controller
+from ChargingSimulator.controller_local_load import controller
 from ChargingSimulator.parameters import param
 import os, sys
 from pathlib import Path
@@ -13,7 +13,7 @@ sim_out = pd.DataFrame()
 testbed = param['Testbed']
 connect_with_charger = True
 df_measurement = pd.DataFrame(columns=['Datetime', 'Iset', 'Igrid_avg','Vgrid_avg','Icharger', 'Vcharger'])
-df_measurement.to_csv('ChargingSimulator/data/realtime_measurement.csv', header=True)
+df_measurement.to_csv('ChargingSimulator/data/charger_measurement.csv', header=True)
 charger_connect = False
 set_current = 0
 set_voltage = param["Vcharger"]
