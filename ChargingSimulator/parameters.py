@@ -10,7 +10,7 @@ param = {
     # EV data file location (ChargingSimulator is needed, since python is run from Matlab folder)
 
     # Controller parameters:
-    "Testbed": False,  # Determines whether or not the mouse should be moved to control the EV charger on the testbed
+    "Testbed": True,  # Determines whether or not the mouse should be moved to control the EV charger on the testbed
     "Ts_data": 5,  # [m] data sample time (for optimization model) minimum is 1 (if changed the signal in simulink needs to be changed as well)
     "Ts": 3,  # [s] simulation sample time (only applicable in stand-alone mode)
     "N": 144,  # number of iterations (this is also controlled by the matlab signal)
