@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Feb 27 15:31:52 2023
+Final modification on Fri Sep 01 09:20
 
-This file runs all other python files and sends the control values to the charger.
+This file runs implement MPC and sends the data in the according future horizon to the optimization model
 
-@author: roela
+@author: Roeland and Rachel
 """
-import ChargingSimulator.InsiteReportsHandler
 import ChargingSimulator.OptimizationModel as opt
+from ChargingSimulator.PriceCurveLoader import load_price
 from ChargingSimulator.parameters import param
 import pandas as pd
 from datetime import datetime as dt
 import datetime
 import numpy as np
-from ChargingSimulator.PriceCurveLoader import load_price
 
-
-## Defining the function controller(i), for which i is the iteration number
-def controller(i, charger_connect):
+## Defining the function controller(i, charging_session)
+# i indicates the iteration number
+# charging_session indicates whether the simulated ev has arrived
+def controller(i, charging_session):
     # updating tnow
     tnow_initial = param['tnow_initial']
     Ts_data = param['Ts_data']
@@ -33,11 +34,17 @@ def controller(i, charger_connect):
     df_load['PV'] = df_load['PV'].astype(float)
     df_load['PV'] = df_load['PV'] * param['PV_scale_factor']
 
-    # price curve in the considered horizon
+    # load the price curve in the considered horizon from the local file
     df_price = load_price()
     df_price = df_price[df_price.index.isin(df_load.index)]
 
-    # evs to be scheduled in the horizon
+    # distinguish the evs in the according horizon and add to the to-be-scheduled ev list
+    # ev_input is the full ev list where all the ev that will present on the day is listed (historical data)
+    # A temporary file "ev.csv" is used to save the present ev status, including their ID, present time, and validated requested energy.
+    # ev_status read "ev.csv" to obtain the ev status that was processed in the previous iteration.
+    # new_ev distinguish the newly arrived ev, which will be added to the "sim_out.csv"
+    # leaving_ev is the ev that is leaving in this iteration
+    # df_ev is the complete ev list that will be scheduled in this iteration (ev_status + new_ev - leaving_ev)    ev_input = pd.read_csv(param['ev_file'], dayfirst=True, parse_dates=[2, 3], dtype={0: np.int64})
     ev_input = pd.read_csv(param['ev_file'], dayfirst=True, parse_dates=[2, 3], dtype={0: np.int64})
     mask = (ev_input['T_departure'] >= tnow) & (ev_input['T_arrival'] <= tnow)
     ev_input = ev_input.loc[mask]
@@ -62,7 +69,9 @@ def controller(i, charger_connect):
     if new_ev.empty:
         # print("No new ev at time = " + str(tnow))
         df_ev = ev_status
-    else:  # check feasibility and then add to the ev.csv, which is the list with involved evs
+    else:
+        # check feasibility and then update to the ev.csv
+        # and add their columns in sim_out.csv that will store their charging current and power
         new_ev = new_ev.reset_index()
         new_ev.drop('index', axis=1, inplace=True)
         new_ev['E_requested'] = new_ev['E_requested'].astype(float)
@@ -78,7 +87,7 @@ def controller(i, charger_connect):
         for i in range(0, len(new_ev)):
             print("EV" + str(new_ev['ChargerId'][i]) + " comes at time = " + str(tnow) + '. Requesting ' + str(new_ev['E_requested'][i]))
             if str(new_ev['ChargerId'][i]) == param['Controlled_ev']:
-                charger_connect = True
+                charging_session = True
             sim_out['EV' + str(new_ev['ChargerId'][i]) + ' (A)'] = default_Icharge
             sim_out['EV' + str(new_ev['ChargerId'][i]) + ' (kW)'] = default_Pcharge
 
@@ -88,14 +97,14 @@ def controller(i, charger_connect):
     for leaving_index in leaving_ev:
         print('EV' + str(df_ev.loc[leaving_index, 'ChargerId']) + ' is leaving.')
         if param['Controlled_ev'] in str(df_ev.loc[leaving_index, 'ChargerId']):
-            charger_connect = False
+            charging_session = False
         df_ev = df_ev.drop(leaving_index)
 
     df_ev.reset_index(drop=True, inplace=True)
-    # Running the optimization model and return the optimized current to be sent
     sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
     if len(df_ev) > 0:
         if param['Enable_controller']:
+            # run the optimization model and return the optimized current to be sent
             Icharge = opt.runOptimization(df_load, df_ev, tnow, Ts_data, df_price)
         else:
             Icharge = 0
@@ -123,4 +132,4 @@ def controller(i, charger_connect):
         Icharge = param['Imin']
         df_ev.to_csv("ChargingSimulator/data/ev.csv", index=False)
 
-    return tnow, Icharge, charger_connect
+    return tnow, Icharge, charging_session

@@ -7,7 +7,6 @@ from ChargingSimulator.parameters import param
 
 def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
     #converting the datetime object to an integer which can be processed by Pyomo
-    #df_ev = df_ev.loc[df_ev['E_requested'] >= 0.01]
     df_ev['T_arrival'] = tnow
     df_ev['I_arrival'] = df_ev['T_arrival'].apply(lambda x: x.value).copy()
     df_ev['I_departure'] = df_ev['T_departure'].apply(lambda x: x.value).copy()
@@ -106,7 +105,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
             else:
                 return model.Icharge[k, i] >= model.imin[s]
 
-        def Current_diff(model, k, i): # for switching
+        def Current_diff(model, k, i): # for switching reduction
             if k == 0:
                 return model.Idiff[k, i] == 0
             else:
@@ -123,7 +122,7 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
         model.con_Current_diff = Constraint(model.N, model.V, rule=Current_diff) # for switching
 
 
-        def costfunction(model, k):
+        def costfunction(model, k): # 3 objective functions that has been tested
             return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N)
             #return sum(model.Idiff[k,i] for k in model.N for i in model.V) + sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 40*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
             #return sum(model.priceSign[k]*(model.price[k]*model.Pgrid[k])**2 for k in model.N) - 0.4*sum(((1/(1+model.price[k]))*model.Pcharge[k, i])**2 for k in model.N for i in model.V)
@@ -172,7 +171,8 @@ def runOptimization(df_load, df_ev, tnow, Ts_data, price_input):
         df_result.index = pd.to_datetime(df_load.index) # with datetime index
 
         print("Optimization at time = " + str(tnow))
-        ## Printing the calculated values
+        # Print the calculated values
+        # and update the result in the sim_out.csv
         for i in range(len(Icharge)):
             print("EV" + str(df_ev['ChargerId'][i]) + " (requesting " + str(df_ev.iloc[i, 1]) + " kWh) is charged at " + str(round(df_result['Current' + str(df_ev['ChargerId'][i])].loc[str(tnow)], 2)) + "A at " + str(tnow))
             sim_out = pd.read_csv('ChargingSimulator/data/sim_out.csv', index_col=0)
